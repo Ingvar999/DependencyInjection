@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace DIContainer
 {
-    class Class2
+    public class DependencyProvider
     {
+        private readonly Dictionary<Type, List<Type>> dependencies;
+        public DependencyProvider(DependenciesConfiguration config)
+        {
+
+        }
     }
 }

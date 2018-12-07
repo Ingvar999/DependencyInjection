@@ -9,7 +9,7 @@ namespace DIContainer
     public class DependenciesConfiguration
     {
         private readonly Dictionary<Type, List<Type>> dependencies;
-        DependenciesConfiguration()
+        public DependenciesConfiguration()
         {
             dependencies = new Dictionary<Type, List<Type>>();
         }
@@ -22,6 +22,10 @@ namespace DIContainer
                 dependencies.Add(typeof(Dep), list);
             }
             list.Add(typeof(Impl));
+        }
+        public IEnumerable<KeyValuePair<Type,List<Type>>> GetContent()
+        {
+            return dependencies.AsEnumerable();
         }
     }
 }
