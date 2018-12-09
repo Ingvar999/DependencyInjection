@@ -13,20 +13,25 @@ namespace DIContainer
         {
             dependencies = new Dictionary<Type, IEnumerable<Type>>();
         }
-        public void Register<Dep, Impl>()
+        public void Register<Dep, Impl>() where Dep : class
+        {
+            Register(typeof(Dep), typeof(Impl));
+        }
+
+        public void Register(Type dep, Type impl)
         {
             List<Type> list;
             IEnumerable<Type> seq;
-            if (!dependencies.TryGetValue(typeof(Dep), out seq))
+            if (!dependencies.TryGetValue(dep, out seq))
             {
                 list = new List<Type>();
-                dependencies.Add(typeof(Dep), list);
+                dependencies.Add(dep, list);
             }
             else
             {
                 list = seq as List<Type>;
             }
-            list.Add(typeof(Impl));
+            list.Add(impl);
         }
         public IEnumerable<KeyValuePair<Type, IEnumerable<Type>>> GetContent()
         {

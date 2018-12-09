@@ -20,9 +20,28 @@ namespace DIContainer
     {
 
     }
-
     public class Class11 : Class1
     {
 
+    }
+    public interface IRepository
+    {
+
+    }
+    public class RepositoryImpl : IRepository
+    {
+
+    }
+    public interface IService<TRepository> where TRepository : IRepository
+    {
+
+    }
+
+    class ServiceImpl<TRepository> : IService<TRepository>
+    where TRepository : IRepository
+    {
+        public ServiceImpl(TRepository repository)
+        {
+        }
     }
 }

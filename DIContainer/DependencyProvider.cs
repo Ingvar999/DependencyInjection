@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,9 +10,13 @@ namespace DIContainer
     public class DependencyProvider
     {
         private readonly Dictionary<Type, List<Type>> dependencies;
+        private readonly ConcurrentDictionary<Type, object> singletonObjects;
+        private readonly bool isSingleton;
 
-        public DependencyProvider(DependenciesConfiguration config)
+        public DependencyProvider(DependenciesConfiguration config, bool singletonPolicy = false)
         {
+            isSingleton = singletonPolicy;
+            singletonObjects = new ConcurrentDictionary<Type, object>();
             dependencies = new Dictionary<Type, List<Type>>();
             foreach(var dependency in config.GetContent())
             {
@@ -41,40 +46,74 @@ namespace DIContainer
             return result;
         }
 
-        private IEnumerable<object> Resolve(Type dep)
+        private IEnumerable<object> Resolve(Type T)
+        {
+            if (T.IsGenericType)
+            {
+                if (T.GetGenericParameterConstraints().Length > 1)
+                {
+                    throw new Exception("Too many generic parameters");
+                }
+                else
+                {
+                    return ResolveGenericType(T);
+                }
+            }
+            else
+            {
+                return ResolveSimpleType(T);
+            }
+        }
+
+        public IEnumerable<object> ResolveSimpleType(Type T)
         {
             var objects = new List<object>();
             List<Type> types;
-            if (dependencies.TryGetValue(dep, out types))
+            if (dependencies.TryGetValue(T, out types))
             {
                 foreach (Type type in types)
                 {
-                    var constructor = type.GetConstructors()[0];
-                    if (constructor.GetParameters().Length == 0)
-                    {
-                       objects.Add(Activator.CreateInstance(type));
-                    }
-                    else
-                    {
-                        object[] args = new object[constructor.GetParameters().Length];
-                        int i = 0;
-                        foreach (var arg in constructor.GetParameters())
-                        {
-                            if (dependencies.ContainsKey(arg.ParameterType))
-                            {
-                                args[i++] = Resolve(arg.ParameterType).FirstOrDefault();
-                            }
-                            else
-                            {
-                                throw new Exception("Cannot find type of dependency");
-                            }
-                        }
-                        objects.Add(constructor.Invoke(args));
-                    }
+                    objects.Add(GetInstance(type));
                 }
             }
 
             return objects;
+        }
+
+        private IEnumerable<object> ResolveGenericType(Type T)
+        {
+
+        }
+
+        private object GetInstance(Type T)
+        {
+            if (isSingleton)
+            {
+                return singletonObjects.GetOrAdd(T, CreateInstanceByConstructor);
+            }
+            else
+            {
+                return CreateInstanceByConstructor(T);
+            }
+        }
+
+        private object CreateInstanceByConstructor(Type T)
+        {
+            var constructor = T.GetConstructors()[0];
+            object[] args = new object[constructor.GetParameters().Length];
+            int i = 0;
+            foreach (var arg in constructor.GetParameters())
+            {
+                if (dependencies.ContainsKey(arg.ParameterType))
+                {
+                    args[i++] = Resolve(arg.ParameterType).FirstOrDefault();
+                }
+                else
+                {
+                    throw new Exception("Require not registered type");
+                }
+            }
+            return constructor.Invoke(args);
         }
     }
 }

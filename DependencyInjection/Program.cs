@@ -19,6 +19,11 @@ namespace DependencyInjection
             config.Register<Class1, Class11>();
             var provider = new DependencyProvider(config);
             var resolves = provider.Resolve<IDependency>();
+            var t1 = typeof(List<int>);
+            var t2 = typeof(List<>);
+            var b1 = t1.ContainsGenericParameters;
+            var b2 = t2.ContainsGenericParameters;
+            var b = t1.GetGenericTypeDefinition().GetHashCode() == t2.GetHashCode();
             Console.ReadKey();
         }
     }
