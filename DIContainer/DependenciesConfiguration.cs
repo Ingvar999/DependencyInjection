@@ -8,22 +8,27 @@ namespace DIContainer
 {
     public class DependenciesConfiguration
     {
-        private readonly Dictionary<Type, List<Type>> dependencies;
+        private readonly Dictionary<Type, IEnumerable<Type>> dependencies;
         public DependenciesConfiguration()
         {
-            dependencies = new Dictionary<Type, List<Type>>();
+            dependencies = new Dictionary<Type, IEnumerable<Type>>();
         }
         public void Register<Dep, Impl>()
         {
             List<Type> list;
-            if (!dependencies.TryGetValue(typeof(Dep), out list))
+            IEnumerable<Type> seq;
+            if (!dependencies.TryGetValue(typeof(Dep), out seq))
             {
                 list = new List<Type>();
                 dependencies.Add(typeof(Dep), list);
             }
+            else
+            {
+                list = seq as List<Type>;
+            }
             list.Add(typeof(Impl));
         }
-        public IEnumerable<KeyValuePair<Type,List<Type>>> GetContent()
+        public IEnumerable<KeyValuePair<Type, IEnumerable<Type>>> GetContent()
         {
             return dependencies.AsEnumerable();
         }
