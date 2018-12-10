@@ -17,13 +17,12 @@ namespace DependencyInjection
             config.Register<IDependency, Class11>();
             config.Register<Class1, Class1>();
             config.Register<Class1, Class11>();
+            config.Register<IRepository, RepositoryImpl>();
+            config.Register<IRepository, MySqlRepository>();
+            config.Register(typeof(IService<>), typeof(ServiceImpl<>));
+            config.Register<IService<MySqlRepository>, ServiceImpl<MySqlRepository>>();
             var provider = new DependencyProvider(config);
-            var resolves = provider.Resolve<IDependency>();
-            var t1 = typeof(List<int>);
-            var t2 = typeof(List<>);
-            var b1 = t1.ContainsGenericParameters;
-            var b2 = t2.ContainsGenericParameters;
-            var b = t1.GetGenericTypeDefinition().GetHashCode() == t2.GetHashCode();
+            var resolves = provider.Resolve<IService<RepositoryImpl>>();
             Console.ReadKey();
         }
     }

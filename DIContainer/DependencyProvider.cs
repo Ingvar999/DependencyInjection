@@ -24,7 +24,7 @@ namespace DIContainer
                 var list = new List<Type>();
                 foreach(var impl in dependency.Value)
                 {
-                    if (dep.IsAssignableFrom(impl) && !impl.IsAbstract && !impl.IsInterface)
+                    if ((dep.IsAssignableFrom(impl) && !impl.IsAbstract && !impl.IsInterface) || (dep.IsGenericTypeDefinition))
                     {
                         list.Add(impl);
                     }
@@ -50,7 +50,7 @@ namespace DIContainer
         {
             if (T.IsGenericType)
             {
-                if (T.GetGenericParameterConstraints().Length > 1)
+                if (T.GetGenericArguments().Length > 1)
                 {
                     throw new Exception("Too many generic parameters");
                 }
@@ -68,8 +68,7 @@ namespace DIContainer
         public IEnumerable<object> ResolveSimpleType(Type T)
         {
             var objects = new List<object>();
-            List<Type> types;
-            if (dependencies.TryGetValue(T, out types))
+            if (dependencies.TryGetValue(T, out List<Type> types))
             {
                 foreach (Type type in types)
                 {
@@ -82,7 +81,18 @@ namespace DIContainer
 
         private IEnumerable<object> ResolveGenericType(Type T)
         {
-
+            var objects = new List<object>(ResolveSimpleType(T));
+            if (objects.Count == 0)
+            {
+                if (dependencies.TryGetValue(T.GetGenericTypeDefinition(), out List<Type> types))
+                {
+                    foreach (Type type in types)
+                    {
+                        objects.Add(GetInstance(type.MakeGenericType(T.GetGenericArguments())));
+                    }
+                }
+            }
+            return objects;
         }
 
         private object GetInstance(Type T)

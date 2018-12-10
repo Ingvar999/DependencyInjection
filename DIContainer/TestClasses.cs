@@ -7,40 +7,18 @@ using System.Threading.Tasks;
 namespace DIContainer
 {
 
-    public interface IDependency
-    {
-
-    } 
-    public class Class1 : IDependency
-    {
-
-    }
-
-    public class Class2 : IDependency
-    {
-
-    }
-    public class Class11 : Class1
-    {
-
-    }
-    public interface IRepository
-    {
-
-    }
-    public class RepositoryImpl : IRepository
-    {
-
-    }
-    public interface IService<TRepository> where TRepository : IRepository
-    {
-
-    }
-
-    class ServiceImpl<TRepository> : IService<TRepository>
+    public interface IDependency { }
+    public class Class1 : IDependency { }
+    public class Class2 : IDependency { }
+    public class Class11 : Class1 { }
+    public interface IRepository { }
+    public class RepositoryImpl : IRepository { }
+    public class MySqlRepository : IRepository { }
+    public interface IService<TRepository> where TRepository : IRepository { }
+    public class ServiceImpl<TRepository> : IService<TRepository>
     where TRepository : IRepository
     {
-        public ServiceImpl(TRepository repository)
+        public ServiceImpl()
         {
         }
     }
