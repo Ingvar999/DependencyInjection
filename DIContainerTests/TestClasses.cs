@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DIContainer
+namespace DIContainerTests
 {
 
     public interface IDependency { }
@@ -21,5 +21,9 @@ namespace DIContainer
         public ServiceImpl()
         {
         }
+    }
+    public interface IDep { }
+    public class DependencyClass : IDep {
+        public DependencyClass(IDependency dependency) { }
     }
 }
